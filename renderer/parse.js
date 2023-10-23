@@ -37,7 +37,7 @@ class Parser {
         this.parsedData.SHAPE != null ? minified.SHAPE = this.parsedData.SHAPE : minified.SHAPE = 0
         this.parsedData.COLOR != null ? minified.COLOR = this.parsedData.COLOR : minified.COLOR = 10
 
-        minified.SIZE *= lazyRealSizes[Math.floor(Math.abs(minified.SHAPE))];
+        if (typeof minified.SHAPE != 'string') minified.SIZE *= lazyRealSizes[Math.floor(Math.abs(minified.SHAPE))];
 
         return minified
     }
