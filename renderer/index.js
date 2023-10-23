@@ -1,6 +1,6 @@
 import { drawPoly, drawTrapezoid } from "./drawEntity.js"
-import { mixColors, modifyColor } from "./modifyColor.js"
-import { getDefinitionData, parseCodeInput } from "./parse.js"
+import { getColor, mixColors, modifyColor } from "./modifyColor.js"
+import { Parser, getDefinitionData, parseCodeInput } from "./parse.js"
 const CONSTANTS = {
     canvasWidthSize: 1.425,
     canvasCenter: {
@@ -38,33 +38,68 @@ function resetCanvas(context) {
 /**
  * @param {CanvasRenderingContext2D} context 
  */
-function draw(context, shape = 0, color = 18, size = 20) {
-    context.fillStyle = modifyColor(color)
-    context.strokeStyle = mixColors(modifyColor(color), "#484848", 0.65)
+function draw(context, definition) {
+    context.fillStyle = (getColor(definition.COLOR))
+    context.strokeStyle = mixColors((getColor(definition.COLOR)), "#484848", 0.65)
     context.lineWidth = 6
     context.lineCap = 'round'
     context.lineJoin = 'round'
     //drawTrapezoid(context, CONSTANTS.canvasCenter.x, CONSTANTS.canvasCenter.y, 100, 20, 0.8, 0, false, true)
-    drawPoly(context, CONSTANTS.canvasCenter.x, CONSTANTS.canvasCenter.y, size, shape, 0, false, true)
+    drawPoly(context, CONSTANTS.canvasCenter.x, CONSTANTS.canvasCenter.y, definition.SIZE, definition.SHAPE, 0, false, true)
 }
 
 // Initialize Canvas
-let parsedCode
-let code
 
 function init(context) {
     resizeCanvas(context)
-    draw(context)
+    let values
+    let timeout
     window.addEventListener('resize', () => {
         resizeCanvas(context)
         resetCanvas(context)
-        draw(context, code.SHAPE, code.COLOR, code.SIZE)
+        try {
+            values = new Parser(codeInput.value).parse()
+        } catch (error) {
+            errorBox.classList.remove('hidden')
+            errorBox.textContent = error
+            clearTimeout(timeout)
+            timeout = setTimeout(() => {
+                errorBox.classList.add('hidden')
+            }, 3000)
+        }
+        draw(context, values)
     })
     codeInput.addEventListener('input', () => {
-        parsedCode = parseCodeInput(codeInput.value, errorBox)
-        code = getDefinitionData(parsedCode)
+        try {
+            values = new Parser(codeInput.value).parse()
+        } catch (error) {
+            errorBox.classList.remove('hidden')
+            errorBox.textContent = error
+            clearTimeout(timeout)
+            timeout = setTimeout(() => {
+                errorBox.classList.add('hidden')
+            }, 3000) 
+        }
         resetCanvas(context)
-        draw(context, code.SHAPE, code.COLOR, code.SIZE)
+        draw(context, values)
     })
 }
 init(ctx)
+
+window.thing = new Parser(`
+    exports.thing = {
+        SHAPE: 10,
+        SIZE: 20,
+        COLOR: 'blue',
+        GUNS: [{
+            POSITION: {X: 10, Y: 20},
+            PROPERTIES: {
+                COLOR: 10,
+            }
+        }],
+        TURRETS: [{
+            POSITION: [0, 1, 1, 0, 0, 0],
+            TYPE: "kronos"
+        }]
+    }
+`)

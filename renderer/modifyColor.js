@@ -432,5 +432,6 @@ let animatedColors = {
 
 export {
     modifyColor,
+    getColor,
     mixColors
 }
