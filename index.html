@@ -8,6 +8,25 @@
     <title>Entity Previewer</title>
 </head>
 <body>
+    <button onclick="codeInput.value = 
+`exports.tank = {
+    SHAPE: -4,
+    SIZE: 25,
+    COLOR: 1,
+    GUNS: [{
+        POSITION: [30, 10, 1, 0, 0, 0, 0],
+        PROPERTIES: {
+          DRAW_ABOVE: true,
+        }
+    }, {
+        POSITION: [10, 30, 1, 0, 0, 0, 0],
+        PROPERTIES: {
+          DRAW_ABOVE: false,
+          COLOR: 5
+        }
+    }]
+}`" id="debug" style="float: right; position: inherit; z-index: 2;">debug</button>
+
     <textarea id="codeInput" rows="20" cols="10" placeholder="exports.tank = {...}"></textarea>
     <canvas id="canvas" width="700" height="100vh"></canvas>
     <div id="error-box" class="hidden"></div>

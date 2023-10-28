@@ -33,16 +33,72 @@ class Parser {
         else if (/[^.]+\.[^=]+ =/.test(data)) throw new SyntaxError("Code must start with `exports.`")
         else throw new SyntaxError("Code is not a valid arras tank syntax")
 
-        this.parsedData.SIZE != null ? minified.SIZE = this.parsedData.SIZE : minified.SIZE = 0
+        this.parsedData.SIZE != null ? minified.SIZE = this.parsedData.SIZE : minified.SIZE = 20
         this.parsedData.SHAPE != null ? minified.SHAPE = this.parsedData.SHAPE : minified.SHAPE = 0
         this.parsedData.COLOR != null ? minified.COLOR = this.parsedData.COLOR : minified.COLOR = 10
+        this.parsedData.BORDERLESS != null ? minified.BORDERLESS = this.parsedData.BORDERLESS : minified.BORDERLESS = false
+        this.parsedData.DRAW_FILL != null ? minified.DRAW_FILL = this.parsedData.DRAW_FILL : minified.DRAW_FILL = true
+
+        if (this.parsedData.GUNS != null) {
+            minified.GUNS = []
+            for (let gun of this.parsedData.GUNS) {
+                minified.GUNS.push(this.parseGun(gun))
+            }
+        }
+
+        // minified.TURRETS = []
+        // for (let turret of this.parsedData.TURRETS) {
+        //     minified.TURRETS.push(this.parseTurret(turret))
+        // }
 
         if (typeof minified.SHAPE != 'string') minified.SIZE *= lazyRealSizes[Math.floor(Math.abs(minified.SHAPE))];
 
+        this.parsedData = minified
+        return this
+    }
+    parseGun(data) {
+        let minified = {}
+        data.POSITION != null ? minified.POSITION = data.POSITION : minified.POSITION = [0, 0, 0, 0, 0, 0, 0]
+        minified.PROPERTIES = {
+            COLOR: 16,
+            BORDERLESS: false,
+            DRAW_FILL: true,
+            DRAW_ABOVE: false
+        }
+        if (data.PROPERTIES != null) {
+            data.PROPERTIES.COLOR != null ? minified.PROPERTIES.COLOR = data.PROPERTIES.COLOR : null
+            data.PROPERTIES.BORDERLESS != null ? minified.PROPERTIES.BORDERLESS = data.PROPERTIES.BORDERLESS : null
+            data.PROPERTIES.DRAW_FILL != null ? minified.PROPERTIES.DRAW_FILL = data.PROPERTIES.DRAW_FILL : null
+            data.PROPERTIES.DRAW_ABOVE != null ? minified.PROPERTIES.DRAW_ABOVE = data.PROPERTIES.DRAW_ABOVE : null
+        }
+        return minified
+    }
+    parseTurret(data) {
+        let minified = {}
+        data.POSITION != null ? minified.POSITION = data.POSITION : minified.POSITION = [0, 0, 0, 0, 0, 0, 0]
         return minified
     }
     standardize(parsedData = this.parsedData) { // will make things easier to deal with by turning things into 1 format
-        return parsedData
+        // turn all positions into an object
+        let standardized = structuredClone(parsedData)
+        
+        if (standardized.GUNS != null) {
+            for (let i = 0; i < standardized.GUNS.length; i++) {
+                if (!Array.isArray(standardized.GUNS[i].POSITION)) continue
+                let position = standardized.GUNS[i].POSITION
+                let newPosition = {
+                    LENGTH: position[0] ?? 0,
+                    WIDTH: position[1] ?? 0, 
+                    ASPECT: position[2] ?? 0,
+                    X: position[3] ?? 0,
+                    Y: position[4] ?? 0,
+                    ANGLE: position[5] ?? 0
+                }
+                standardized.GUNS[i].POSITION = newPosition
+            }
+        }
+        this.parsedData = standardized
+        return this.parsedData
     }
 }
 
